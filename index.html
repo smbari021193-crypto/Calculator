@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#101827">
+
+
+
+<title>Intraday Position Size</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--card:#141e2e;--line:#26364b;--text:#f2f5fa;--muted:#a4b2c5;--accent:#6ee7b7;--red:#fb7185}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:linear-gradient(180deg,#101827,#080e18);color:var(--text);min-height:100vh;padding:18px 14px 30px}main{max-width:520px;margin:auto}header{padding:8px 4px 18px}h1{font-size:23px;margin:0 0 6px}.sub{color:var(--muted);font-size:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 10px 24px #0002}
+label{display:block;color:var(--muted);font-size:13px;margin:0 0 7px}input{width:100%;background:#0b1422;border:1px solid #31435b;border-radius:12px;color:var(--text);padding:14px;font-size:18px;outline:none}input:focus{border-color:var(--accent)}.field{margin-bottom:14px}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.switch{display:flex;gap:8px}.switch button{flex:1;border:1px solid var(--line);background:#0b1422;color:var(--muted);border-radius:12px;padding:13px;font-size:15px;font-weight:700}.switch button.active{background:#123d35;color:var(--accent);border-color:#287d67}
+.results{display:grid;grid-template-columns:1fr 1fr;gap:10px}.result{background:#0b1422;border:1px solid var(--line);border-radius:13px;padding:12px;min-height:82px}.k{color:var(--muted);font-size:12px;margin-bottom:7px}.v{font-size:19px;font-weight:750;word-break:break-word}.highlight{border-color:#287d67}.highlight .v{color:var(--accent)}.profit .v{color:var(--accent)}.full{grid-column:1/-1}.warning{color:var(--red);font-size:13px;line-height:1.45;margin-top:8px}.note{font-size:12px;color:var(--muted);line-height:1.5}.reset{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:10px 14px}.footer{text-align:center;color:#8392a6;font-size:11px;padding:12px 4px}.sectiontitle{font-size:16px;font-weight:700;margin:2px 0 10px}.targetbox{border:1px solid #244d43;background:#0d211d;border-radius:13px;padding:12px;margin-top:10px}.targetbox .targethead{font-weight:700;color:var(--accent);margin-bottom:8px}.targetgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.small{font-size:12px;color:var(--muted)}.install{border:1px solid #2e6757;background:#102820;border-radius:12px;padding:12px;color:#c7f8e5;margin-top:10px}
+</style>
+</head>
+<body><main>
+<header><h1>Intraday Position Size</h1><div class="sub">Risk-based quantity · 5× leverage · Offline calculator</div></header>
+<section class="card">
+<div class="field"><label for="capital">Trading capital (₹)</label><input id="capital" type="number" inputmode="decimal" value="200000" min="1"></div>
+<div class="row">
+<div class="field"><label for="entry">Entry price (₹)</label><input id="entry" type="number" inputmode="decimal" placeholder="Entry" step="0.01" min="0.01"></div>
+<div class="field"><label for="sl">Stop-loss price (₹)</label><input id="sl" type="number" inputmode="decimal" placeholder="Stop loss" step="0.01" min="0.01"></div>
+</div>
+<div class="field"><label>Trade direction</label><div class="switch"><button id="long" class="active" type="button">BUY / LONG</button><button id="short" type="button">SELL / SHORT</button></div></div>
+<div class="note">Fixed risk: 1% of capital · Leverage limit: 5× · Profit targets: 1.5R and 2R</div>
+</section>
+<section class="card"><div class="sectiontitle">Position details</div><div class="results">
+<div class="result highlight"><div class="k">Risk budget (1%)</div><div class="v" id="risk">₹2,000.00</div></div>
+<div class="result"><div class="k">Risk per share</div><div class="v" id="rps">—</div></div>
+<div class="result highlight"><div class="k">Recommended quantity</div><div class="v" id="qty">—</div></div>
+<div class="result"><div class="k">Position value</div><div class="v" id="value">—</div></div>
+<div class="result"><div class="k">Margin required (5×)</div><div class="v" id="margin">—</div></div>
+<div class="result"><div class="k">Estimated loss at SL</div><div class="v" id="loss">—</div></div>
+<div class="result full"><div class="k">Quantity calculation</div><div class="v" style="font-size:15px" id="formula">Enter entry and stop-loss</div></div>
+</div><div id="msg" class="warning"></div></section>
+<section class="card"><div class="sectiontitle">Estimated profit at targets</div>
+<div id="targets">
+<div class="targetbox"><div class="targethead">Target 1 — 1.5R</div><div class="targetgrid"><div><div class="small">Target price</div><b id="target15">—</b></div><div><div class="small">Profit (100%)</div><b id="profit15">—</b></div><div><div class="small">70% booked profit</div><b id="book15">—</b></div><div><div class="small">30% runner at target</div><b id="run15">—</b></div></div></div>
+<div class="targetbox"><div class="targethead">Target 2 — 2R</div><div class="targetgrid"><div><div class="small">Target price</div><b id="target2">—</b></div><div><div class="small">Profit (100%)</div><b id="profit2">—</b></div><div><div class="small">70% booked profit</div><b id="book2">—</b></div><div><div class="small">30% runner at target</div><b id="run2">—</b></div></div></div>
+</div></section>
+<section class="card"><div class="note"><b>Calculation:</b> Quantity is the smaller of (risk budget ÷ risk per share) and (capital × 5 ÷ entry price), rounded down to whole shares. Target profit assumes the entire quantity exits at the target. 70% booked and 30% runner figures are estimates based on fractional quantities for calculation; actual share quantities should be rounded to tradable whole shares. Fees, taxes, slippage, gaps and broker margin rules are not included.</div>
+<div class="install"><b>Home-screen shortcut:</b> Open this app page in Chrome, tap ⋮ → <b>Add to Home screen</b> or <b>Install app</b>. The app icon is included.</div></section>
+<div style="text-align:center"><button class="reset" id="reset" type="button">Reset</button></div><div class="footer">Local calculator — no trade data is uploaded or stored.</div>
+</main>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);let side="long";
+const fmt=n=>Number.isFinite(n)?n.toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}):"—";
+const money=n=>"₹"+fmt(n);
+function clearResults(){["rps","qty","value","margin","loss","target15","profit15","book15","run15","target2","profit2","book2","run2"].forEach(id=>$(id).textContent="—")}
+function render(){
+ const cap=Math.max(0,Number($("capital").value)||0),e=Math.max(0,Number($("entry").value)||0),s=Math.max(0,Number($("sl").value)||0),budget=cap*.01;
+ $("risk").textContent=money(budget);$("msg").textContent="";
+ if(!cap||!e||!s){clearResults();$("formula").textContent="Enter entry and stop-loss";return}
+ const valid=side==="long"?s<e:s>e;
+ if(!valid){clearResults();$("msg").textContent=side==="long"?"For a BUY, stop-loss must be below entry price.":"For a SELL, stop-loss must be above entry price.";$("formula").textContent="Correct the stop-loss direction";return}
+ const rps=Math.abs(e-s),riskQty=Math.floor(budget/rps),levQty=Math.floor(cap*5/e),qty=Math.max(0,Math.min(riskQty,levQty)),notional=qty*e,margin=notional/5,loss=qty*rps;
+ const targetPrice=(r)=>side==="long"?e+r*rps:e-r*rps;
+ const totalProfit=(r)=>qty*r*rps;
+ const targetData=(r,prefix)=>{
+  const tp=targetPrice(r),profit=totalProfit(r),book=profit*.7,runner=profit*.3;
+  $(prefix==="15"?"target15":"target2").textContent=money(tp);
+  $("profit"+prefix).textContent=money(profit);
+  $("book"+prefix).textContent=money(book);
+  $("run"+prefix).textContent=money(runner);
+ };
+ $("rps").textContent=money(rps);$("qty").textContent=qty.toLocaleString("en-IN");$("value").textContent=money(notional);$("margin").textContent=money(margin);$("loss").textContent=money(loss);
+ targetData(1.5,"15");targetData(2,"2");
+ $("formula").textContent=`${money(budget)} ÷ ${money(rps)} = ${riskQty.toLocaleString("en-IN")} shares by risk; 5× leverage allows ${levQty.toLocaleString("en-IN")}; final quantity ${qty.toLocaleString("en-IN")}.`;
+ if(riskQty>levQty)$("msg").textContent="Quantity reduced due to the 5× leverage limit.";
+}
+$("long").onclick=()=>{side="long";$("long").classList.add("active");$("short").classList.remove("active");render()};
+$("short").onclick=()=>{side="short";$("short").classList.add("active");$("long").classList.remove("active");render()};
+["capital","entry","sl"].forEach(id=>$(id).addEventListener("input",render));
+$("reset").onclick=()=>{$("capital").value="200000";$("entry").value="";$("sl").value="";side="long";$("long").classList.add("active");$("short").classList.remove("active");render()};
+if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("sw.js").catch(()=>{})}
+render();
+})();
+</script></body></html>
